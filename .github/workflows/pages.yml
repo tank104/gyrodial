@@ -1,0 +1,46 @@
+name: pages
+
+# Publishes the browser firmware installer (web/) to GitHub Pages, with the firmware from the
+# release, whenever a release (not a pre-release) is published. Run it by hand to redeploy the
+# latest release.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name != 'release' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get the release's firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          # With no tag (run by hand), gh downloads from the latest release
+          gh release download $TAG --repo "$GITHUB_REPOSITORY" --pattern 'puck-firmware-*.zip' --dir "$RUNNER_TEMP/fw"
+          mkdir -p web/firmware
+          unzip -o "$RUNNER_TEMP"/fw/puck-firmware-*.zip -d web/firmware
+          ls -la web/firmware
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deploy
+        uses: actions/deploy-pages@v4

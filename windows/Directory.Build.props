@@ -3,7 +3,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>0.1.0</Version>
+    <!-- One version for the app and the firmware: ../VERSION (release tags are v<VERSION>) -->
+    <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\VERSION').Trim())</Version>
     <Company>Puck</Company>
     <Product>Puck for Windows</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>

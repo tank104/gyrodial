@@ -4,7 +4,9 @@
 #   idf.py -p COM5 flash
 cmake_minimum_required(VERSION 3.16)
 
-set(PROJECT_VER "0.2.0")
+# One version for the firmware and the Windows app, kept in ../VERSION (release tags are v<VERSION>).
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../VERSION" PROJECT_VER LIMIT_COUNT 1)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../VERSION")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 

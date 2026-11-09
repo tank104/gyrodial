@@ -1,9 +1,18 @@
 name: build
 
+# Builds the firmware and the app and runs the tests, for every push to main and every pull request.
+# Pull requests need both jobs (firmware, windows) to pass before they can be merged.
 on:
   push:
     branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   firmware:

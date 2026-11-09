@@ -1,0 +1,56 @@
+name: Bug report
+description: Something on the puck or in the app doesn't work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: And what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+      placeholder: |
+        1. Open the trackpad face
+        2. Lift the puck
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App and firmware version
+      description: The app's version is at the bottom of Settings. For the firmware, give the release you flashed (if you installed it from the app, it's the app's version).
+      placeholder: app 0.2.0, firmware 0.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: link
+    attributes:
+      label: How is the puck connected?
+      options:
+        - USB
+        - Bluetooth
+        - Both / it switches
+        - Not connected
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+  - type: input
+    id: board
+    attributes:
+      label: Board
+      description: Which board, and anything different about it (battery, case, revision).
+      placeholder: Waveshare ESP32-S3-Touch-AMOLED-1.75C
+  - type: textarea
+    id: diag
+    attributes:
+      label: Diagnostics
+      description: |
+        If the puck is involved, send `{"t":"diag"}` to its COM port and paste the line it sends back (see docs/HARDWARE.md). Logs from the app or the firmware's UART help too.
+      render: text

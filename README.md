@@ -1,26 +1,44 @@
-# Puck for Windows
+# gyrodial
 
-A palm-sized round dial for your Windows PC, built on the **Waveshare ESP32-S3-Touch-AMOLED-1.75C**
-(about $40, nothing to solder). Turn it for volume. Flip its face to a trackpad, a focus timer, or
-Claude. Approve Claude Code's permission prompts from your desk.
+**A palm-sized round dial for your Windows PC.** Turn it for volume. Flip its face to a trackpad, a
+focus timer, or Claude. Approve Claude Code's permission prompts from your desk.
 
-It's a Windows take on [Watt, the puck](https://watt.sourabhdaroji.com/) by Sourabh Daroji, which is
-Mac-only. This is a separate implementation (firmware and app written from scratch). It does speak
-the same page protocol as [`dialkit-watt`](https://github.com/gizmofalcon/dialkit-watt), so that
-npm package works with Puck on Windows unchanged.
+[![build](https://github.com/tank104/gyrodial/actions/workflows/build.yml/badge.svg)](https://github.com/tank104/gyrodial/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/tank104/gyrodial?sort=semver)](https://github.com/tank104/gyrodial/releases/latest)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-```
- ┌──────────── the puck (ESP32-S3) ────────────┐        ┌──────────── Windows ─────────────┐
- │ 466×466 AMOLED · touch · IMU · PMU · speaker │  USB   │ Puck.exe (tray)                  │
- │ faces: home/volume, trackpad, pointer,       │◄──────►│  volume · media · mouse          │
- │ Claude, approvals, DialKit, game, call,      │  or    │  Claude voice chat               │
- │ focus, spin, dice, pong, pairing             │  BLE   │  Claude Code hook (puck-hook.exe)│
- └──────────────────────────────────────────────┘ NDJSON │  DialKit / games (ws :47824)     │
-                                                         │  Teams meeting mute              │
-                                                         └──────────────────────────────────┘
-```
+![Six of the puck's faces: volume, now playing, trackpad, Claude, a Claude Code approval, and a focus timer](docs/hero.png)
 
-![The faces, rendered by the desktop simulator](docs/faces.png)
+It runs on the **Waveshare ESP32-S3-Touch-AMOLED-1.75C** (about US$40, nothing to solder). It has no
+knob: the whole puck is the dial, and its gyro senses the turn. That's where the name comes from.
+The device and its tray app are both called **Puck**.
+
+gyrodial is a Windows take on [Watt, the puck](https://watt.sourabhdaroji.com/) by Sourabh Daroji,
+which is Mac-only. It's a separate implementation, with the firmware and app written from scratch, and
+it isn't affiliated with Watt. It does speak the same page protocol as
+[`dialkit-watt`](https://github.com/gizmofalcon/dialkit-watt), so that npm package works with it
+unchanged.
+
+> **Status:** early. Everything here has been built and tested on one board. Bug reports, and results
+> from other boards, are very welcome.
+
+## Get started
+
+You need the board, a USB-C data cable, and Windows 10 (version 2004) or later on x64.
+
+1. **Get the board:** the [Waveshare ESP32-S3-Touch-AMOLED-1.75C](https://www.waveshare.com/esp32-s3-touch-amoled-1.75c.htm). A LiPo battery is optional.
+2. **Get the app:** download `Puck-<version>-win-x64.zip` from the
+   [latest release](https://github.com/tank104/gyrodial/releases/latest), unzip it anywhere, and run
+   `Puck.exe`. It's self-contained, so there's nothing else to install. The app isn't code-signed yet,
+   so Windows SmartScreen may warn you the first time: choose *More info → Run anyway*.
+3. **Install the firmware**, either way:
+   - **From the app:** plug the board in, then go to *Settings → Firmware*.
+   - **From your browser:** open the [web installer](https://tank104.github.io/gyrodial/) in Chrome or Edge, and click Install.
+4. **Pair:** the puck shows a few numbers. Turn it to each one and tap. After that, it connects on
+   its own, over USB or Bluetooth.
+
+If the board won't connect for flashing, hold **BOOT** while plugging it in. Flashing replaces what's
+on the board; [here's how to back it up first](docs/HARDWARE.md#backing-up-the-board).
 
 ## What it does
 
@@ -38,55 +56,29 @@ npm package works with Puck on Windows unchanged.
 | **Spin**, **Dice** | Tap to spin or roll (or shake for dice). |
 | No PC connected | It plays circular **Pong**. |
 
-## Build one
+<details>
+<summary>See every face (rendered by the desktop simulator)</summary>
 
-1. **Get the board:** [Waveshare ESP32-S3-Touch-AMOLED-1.75C](https://www.waveshare.com/esp32-s3-touch-amoled-1.75c.htm). A LiPo battery is optional.
-2. **Install the firmware:** any one of these works.
-   - **From the app:** Settings → Firmware (it fetches `esptool` if needed).
-   - **From the browser:** run `scripts/build.ps1` first, then serve `web/` over https or localhost (`python -m http.server -d web`), open it in Chrome or Edge, and click Install.
-   - **From source:** `cd firmware && idf.py -p COM5 flash` (in an ESP-IDF v5.5 shell; use your board's port).
-3. **Run Puck.exe:** it finds the puck over USB or Bluetooth. To pair, turn the puck to each number it shows and tap.
+![Every face the puck can show](docs/faces.png)
 
-If the board won't enter download mode, hold **BOOT** while plugging it in.
+</details>
 
-Flashing replaces whatever is on the board. To keep a copy of the current firmware (all 32 MB of
-flash), run this first, replacing `COM4` with your board's port:
+## How it works
 
-```powershell
-python -m esptool --chip esp32s3 --port COM4 read_flash 0 0x2000000 board-backup.bin
-# and to put it back later:
-python -m esptool --chip esp32s3 --port COM4 write_flash 0 board-backup.bin
+```
+ ┌──────────── the puck (ESP32-S3) ────────────┐        ┌──────────── Windows ─────────────┐
+ │ 466×466 AMOLED · touch · IMU · PMU · speaker │  USB   │ Puck.exe (tray)                  │
+ │ faces: home/volume, trackpad, pointer,       │◄──────►│  volume · media · mouse          │
+ │ Claude, approvals, DialKit, game, call,      │  or    │  Claude voice chat               │
+ │ focus, spin, dice, pong, pairing             │  BLE   │  Claude Code hook (puck-hook.exe)│
+ └──────────────────────────────────────────────┘ NDJSON │  DialKit / games (ws :47824)     │
+                                                         │  Teams meeting mute              │
+                                                         └──────────────────────────────────┘
 ```
 
-## Building from source
-
-Prerequisites: [ESP-IDF v5.5](https://docs.espressif.com/projects/esp-idf/en/v5.5.3/esp32s3/get-started/windows-setup.html)
-(the build script finds it in `~/esp/esp-idf`, `$env:IDF_PATH`, or `-IdfPath`), the .NET 10 SDK,
-and Windows 10 2004 or later.
-
-```powershell
-./scripts/build.ps1          # firmware + app → dist/Puck-win-x64.zip (self-contained, no .NET needed to run it)
-```
-
-Or piece by piece:
-
-```powershell
-cd firmware; idf.py build                    # firmware (ESP-IDF v5.5, LVGL 8.4, NimBLE), in an ESP-IDF shell
-dotnet build windows/Puck.sln                # app, integrations, puck-hook
-dotnet test windows/Puck.sln                 # integration tests
-windows/src/Puck.App/bin/Debug/net10.0-windows10.0.22621.0/Puck.exe --self-test   # link logic against a fake puck
-```
-
-`scripts/build.ps1` copies the firmware images into the app (`windows/src/Puck.App/firmware`) and
-the web installer (`web/firmware`), along with an ESP Web Tools `manifest.json`.
-
-**Seeing the faces without a board:** `firmware/tools/sim` compiles the real face code against a
-pretend board with MSYS2 gcc, and writes a PNG of every face to `tools/sim/out/`
-(`cd firmware/tools/sim && ./build.sh && ./build/sim.exe`).
-
-**Firmware logs and crashes:** the USB port carries only the app's protocol. ESP-IDF's console
-(boot log, `ESP_LOGx` lines, panics) is on UART0 (GPIO43 TX / GPIO44 RX, 115200 baud). A crash is
-also saved to the `coredump` partition: `idf.py -p COM5 coredump-info` reads it back over USB.
+The puck and the app talk in newline-delimited JSON, over the board's USB serial port or over
+Bluetooth LE. [docs/PROTOCOL.md](docs/PROTOCOL.md) describes every
+message, so you can write your own host or face.
 
 ## Setting up the integrations
 
@@ -113,50 +105,31 @@ All of them are in **Settings → Integrations** in the tray app.
   the third-party app API. The first time you press mute on the puck during a meeting, Teams asks you
   to allow Puck.
 
-## Repository layout
+## Building from source
 
-| Path | What |
-|---|---|
-| `docs/PROTOCOL.md` | The wire protocol between the puck and the app (NDJSON over USB serial or a BLE UART-style service) |
-| `firmware/` | ESP-IDF project (`sdkconfig.defaults`, `partitions.csv`, LVGL from the component registry, cJSON built into IDF). `main/hal` = board (CO5300 QSPI display + LVGL port, CST9217 touch, QMI8658 motion, AXP2101 power, ES8311 sound, on IDF's native drivers). `main/hostlink` = BLE (NimBLE) + USB link, pairing. `main/ui` = the faces. `tools/sim` = a desktop renderer that writes PNGs of the faces. |
-| `windows/src/Puck.Core` | Shared contracts: protocol messages, settings, the integration interfaces |
-| `windows/src/Puck.App` | The tray app: transports, pairing, volume/media/mouse, flyout, settings, firmware installer |
-| `windows/src/Puck.Integrations` | Claude voice chat, Claude Code approvals, DialKit/game bridge, Teams |
-| `windows/src/PuckHook` | `puck-hook.exe`, the Claude Code hook command |
-| `web/` | Browser firmware installer (ESP Web Tools) |
-| `scripts/build.ps1` | Builds and packages everything |
+You need [ESP-IDF v5.5](https://docs.espressif.com/projects/esp-idf/en/v5.5.3/esp32s3/get-started/windows-setup.html)
+for the firmware and the [.NET 10 SDK](https://dotnet.microsoft.com/download) for the app.
 
-## Hardware notes
+```powershell
+./scripts/build.ps1          # firmware + app → dist/Puck-win-x64.zip
+cd firmware; idf.py -p COM5 flash   # flash your own build (in an ESP-IDF shell; use your board's port)
+```
 
-The display init, pins and I2C addresses come from Waveshare's own board support package for this
-board. Orientation-dependent behaviour is one named constant each, if a board needs it flipped:
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the rest: building piece by piece, the tests, the face
+simulator (see every face without a board), and the repository layout.
 
-- **Turn direction:** `TURN_SIGN` in `firmware/main/config.h` (or *Flip turn direction* in the app's settings).
-- **Screen-up axis** (drives lifted/flat and the air mouse): `kScreenUpZ` in `firmware/main/hal/motion.cpp`.
-- **Air-mouse directions:** `kPointerXSign` / `kPointerYSign` in `motion.cpp`.
-- **Touch orientation:** `TOUCH_MIRROR_X/Y` in `config.h`.
-- **Display:** `LCD_COL_OFFSET` (6, as in Waveshare's examples) in `config.h`, and the QSPI clock `kLcdClockHz` (40 MHz, as in Waveshare's BSP) in `hal/display.cpp`.
+## More
 
-The UART0 console logs a line for each device that fails to start (touch, IMU, PMU, codec). The puck
-keeps running without it; `diag` (below) shows the same over USB.
+- [docs/PROTOCOL.md](docs/PROTOCOL.md): the wire protocol between the puck and the app.
+- [docs/HARDWARE.md](docs/HARDWARE.md): the board, what to change if yours behaves differently,
+  diagnostics, logs and backups.
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to build, test and send a pull request.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability privately.
 
-**Diagnostics:** send `{"t":"diag"}` over the puck's COM port (allowed before pairing). It answers
-with one line containing:
-- uptime and reset reason
-- display on/off and brightness, and how many times the screen has toggled
-- which chips answered
-- battery
-- per-type counts of the touch, turn and button events it has seen
-- live motion readings and the learned gyro bias
-- current face and pairing state
+## Contributing
 
-**Checked on a real 1.75C (Puck-1D4D):**
-- Every chip starts.
-- Lying flat it reads +0.96 g on z.
-- Its gyro sits about 15 °/s off zero on X; the puck learns and removes that within a second of lying still.
-- The PMU's fuel gauge reads nonsense, so battery % comes from the voltage.
-- Pairing starts, cancels and times out correctly over USB; the app connects over Bluetooth too.
-- Touch (trackpad) and turning work by hand; the air mouse's axes were tuned on it.
+Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first. For
+anything bigger than a fix, open an issue to talk it through before you start.
 
 ## Credits
 
@@ -167,4 +140,9 @@ with one line containing:
 
 ## License
 
-MIT, see [LICENSE](LICENSE). The Nunito font files keep their own license (`firmware/tools/fonts/OFL.txt`), and the ported driver files credit SensorLib and XPowersLib in their headers.
+MIT, see [LICENSE](LICENSE). The Nunito font files keep their own license
+(`firmware/tools/fonts/OFL.txt`), and the ported driver files credit SensorLib and XPowersLib in
+their headers.
+
+gyrodial isn't affiliated with Watt, Waveshare, Anthropic or Microsoft. Product names are
+trademarks of their owners.

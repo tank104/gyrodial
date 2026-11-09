@@ -1,0 +1,22 @@
+name: Idea or feature request
+description: A new face, an integration, or a way to make something better.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: What are you trying to do that the puck or the app doesn't help with yet?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could it work?
+      description: How you'd use it on the puck (turn, tap, swipe, button) and what the PC should do.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Helping
+      options:
+        - label: I'd like to work on this myself (please wait for a reply here before starting).
