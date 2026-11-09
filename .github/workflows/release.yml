@@ -93,7 +93,8 @@ jobs:
           $sums = Get-ChildItem release -File | Sort-Object Name | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
           }
-          Set-Content release/SHA256SUMS.txt -Value $sums -Encoding ascii
+          # \n line endings, so `sha256sum -c SHA256SUMS.txt` works too
+          [IO.File]::WriteAllText("$PWD/release/SHA256SUMS.txt", ($sums -join "`n") + "`n")
           Get-ChildItem release | Format-Table Name, Length
       - uses: actions/upload-artifact@v4
         with:
