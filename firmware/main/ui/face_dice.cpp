@@ -1,4 +1,4 @@
-// Dice: one to three of them (turn to change how many). Tap, or give the puck a shake, to roll.
+// Dice: one to three of them (turn to change how many). Tap, or give the dial a shake, to roll.
 #include <stdio.h>
 #include "ui_common.h"
 

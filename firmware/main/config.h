@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // The firmware version is PROJECT_VER in firmware/CMakeLists.txt (esp_app_get_description()).
-#define PUCK_PROTOCOL_VERSION 1
+#define GYRODIAL_PROTOCOL_VERSION 1
 
 // ---- display: CO5300 AMOLED, 466x466, QSPI
 #define LCD_W 466
@@ -47,7 +47,7 @@
 // ---- buttons
 #define PIN_BOOT_BTN 0   // BOOT, active low. The PWR key is read through the AXP2101.
 
-// ---- motion: which way is "clockwise" when the puck lies screen-up on the desk.
+// ---- motion: which way is "clockwise" when the dial lies screen-up on the desk.
 // QMI8658 gyro z is counter-clockwise-positive seen from above (right-hand rule, z out of the
 // screen), so clockwise = -gz. Flip here if the board turns out to be mounted the other way.
 #define TURN_SIGN (-1.0f)

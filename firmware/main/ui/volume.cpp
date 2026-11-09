@@ -1,4 +1,4 @@
-// The system volume, as the dial sees it. The puck owns the number while it's being turned (the
+// The system volume, as the dial sees it. The dial owns the number while it's being turned (the
 // app's echo is ignored for a moment), and the app owns it the rest of the time.
 #include "ui_common.h"
 

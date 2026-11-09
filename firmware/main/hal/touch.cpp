@@ -55,7 +55,7 @@ inline int dist2(int dx, int dy) { return dx * dx + dy * dy; }
 bool trackpad() { return s_mode == InputMode::Trackpad; }
 
 // Turn a drag on the glass into pointer motion that keeps "up" pointing away from the user even
-// after the puck has been turned on the desk: rotate by how far it turned since trackpad mode began.
+// after the dial has been turned on the desk: rotate by how far it turned since trackpad mode began.
 float s_headingAtEntry = 0;
 void sendTrackpadMove(float dx, float dy) {
   const float th = (motionHeading() - s_headingAtEntry) * (float)M_PI / 180.0f;

@@ -6,14 +6,14 @@ body:
     id: problem
     attributes:
       label: What would you like to do?
-      description: What are you trying to do that the puck or the app doesn't help with yet?
+      description: What are you trying to do that the dial or the app doesn't help with yet?
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
       label: How could it work?
-      description: How you'd use it on the puck (turn, tap, swipe, button) and what the PC should do.
+      description: How you'd use it on the dial (turn, tap, swipe, button) and what the PC should do.
   - type: checkboxes
     id: help
     attributes:

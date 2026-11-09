@@ -1,0 +1,31 @@
+Gyrodial firmware {VERSION}
+for the Waveshare ESP32-S3-Touch-AMOLED-1.75C
+==============================================
+
+You don't need this zip for the usual ways of installing the firmware:
+  - In the Gyrodial app: Settings > Firmware > Install.
+  - In Chrome or Edge: https://tank104.github.io/gyrodial/ and click Install.
+
+This zip is for flashing it yourself with esptool (https://github.com/espressif/esptool).
+Plug the board in with a USB-C data cable and find its COM port (Device Manager > Ports).
+If it won't connect, hold BOOT on the board while you plug it in.
+
+Everything in one image, written at 0x0:
+
+  python -m esptool --chip esp32s3 --port COM5 write_flash 0x0 gyrodial-merged.bin
+
+Or the separate images:
+
+  python -m esptool --chip esp32s3 --port COM5 write_flash 0x0 bootloader.bin 0x8000 partition-table.bin 0xe000 ota_data_initial.bin 0x10000 gyrodial.bin
+
+Replace COM5 with your board's port. Your pairings survive an update; add "--erase-all"
+(after write_flash) to start from scratch.
+
+What's in here
+  gyrodial-merged.bin    the whole firmware as one image, for 0x0
+  bootloader.bin         \
+  partition-table.bin     | the same firmware as separate images
+  ota_data_initial.bin    |
+  gyrodial.bin           /
+  manifest.json          for ESP Web Tools
+  gyrodial.elf           debug symbols, to decode a crash dump (idf.py coredump-info)

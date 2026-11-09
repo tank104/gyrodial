@@ -1,5 +1,5 @@
 // Pong, round: the ball bounces around inside the glass and two paddles on the rim, opposite each
-// other, turn together with the puck. Left alone it plays itself, which is also what the puck does
+// other, turn together with the dial. Left alone it plays itself, which is also what the dial does
 // while it's waiting for the PC.
 #include "ui_common.h"
 
@@ -70,7 +70,7 @@ void launch() {
 void refreshStatus() {
   bool linked = g_model.linked;
   // On USB power with nobody talking, the cable is in: it's the app that isn't there
-  setText(status, hal::usbPowered() ? "Open Puck on your PC" : "Looking for your PC\xE2\x80\xA6");
+  setText(status, hal::usbPowered() ? "Open Gyrodial on your PC" : "Looking for your PC\xE2\x80\xA6");
   if (linked == shownLinked) return;
   shownLinked = linked;
   hide(status, linked);

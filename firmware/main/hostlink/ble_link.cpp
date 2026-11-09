@@ -1,5 +1,5 @@
 // Bluetooth LE on ESP-IDF's NimBLE host: one service with an RX characteristic the app writes into
-// and a TX characteristic the puck notifies on. Together they carry the same NDJSON byte stream as
+// and a TX characteristic the dial notifies on. Together they carry the same NDJSON byte stream as
 // USB, cut into MTU-sized pieces (a piece can hold part of a line or several lines).
 //
 // NimBLE's callbacks run on the NimBLE host task. They only hand bytes and events over to poll()
@@ -41,7 +41,7 @@ ble_gatt_chr_def s_chrs[3] = {};
 ble_gatt_svc_def s_svcs[2] = {};
 uint16_t s_txHandle = 0;
 uint8_t s_ownAddrType = BLE_OWN_ADDR_PUBLIC;
-char s_name[32] = "Puck";
+char s_name[32] = "Gyrodial";
 
 StreamBufferHandle_t s_rx = nullptr;
 QueueHandle_t s_events = nullptr;

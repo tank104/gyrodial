@@ -1,4 +1,4 @@
-// Game: a dialkit-watt game page has the puck as its controller. The paddle on the rim is where the
+// Game: a dialkit-watt game page has the dial as its controller. The paddle on the rim is where the
 // page says it is; turning moves it (and tells the page), taps and swipes go straight through.
 #include "ui_common.h"
 
