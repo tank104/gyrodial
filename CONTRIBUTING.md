@@ -94,19 +94,29 @@ before/after images in your pull request.
 2. Make sure `dotnet test windows/Puck.sln` passes and the firmware builds.
 3. Open a pull request and fill in the template. Say how you tested it, and on what hardware if any.
 
-CI builds the firmware and the app and runs the tests on every pull request. For a contributor
-from outside the project, a maintainer approves the CI run first. A maintainer reviews every pull
-request and merges it (squashed into one commit) once CI passes. `main` can't be pushed to directly
-by contributors.
+Every change to `main` goes through a pull request, the maintainer's own included: nobody pushes to
+`main` directly. On every pull request, CI:
+
+- builds the firmware with ESP-IDF
+- builds the face simulator from the same UI code and renders every face (download the `faces`
+  image from the run to see them)
+- builds the app and runs the unit tests
+- runs `Puck.exe --self-test` (the connection logic against a fake puck)
+
+A pull request can be merged only when all of that passes and the branch is up to date with `main`
+(GitHub's *Update branch* button does that). For contributors from outside the project, a
+maintainer approves the CI run first. The maintainer reviews every pull request and merges it,
+squashed into one commit.
 
 By contributing, you agree that your contribution is licensed under the project's
 [MIT license](LICENSE).
 
 ## Releasing (maintainers)
 
-1. Set the new version in `VERSION` (for example `0.3.0`) and merge that to `main`.
-2. Tag it and push the tag:
+1. Set the new version in `VERSION` (for example `0.3.0`) in a pull request, and merge it.
+2. Tag the merged commit on `main` and push the tag:
    ```powershell
+   git switch main; git pull
    git tag v0.3.0
    git push origin v0.3.0
    ```
