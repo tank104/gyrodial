@@ -1,0 +1,11 @@
+# ESP-IDF build output and downloaded components (dependencies.lock pins them)
+build/
+build-*/
+managed_components/
+# generated from sdkconfig.defaults on the first build
+sdkconfig
+sdkconfig.old
+# face simulator output
+tools/sim/build/
+tools/sim/out/
+.vscode/

@@ -1,0 +1,27 @@
+<Window x:Class="Puck.App.UI.VolumeOsd"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Puck volume" Width="260" Height="76"
+        WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ShowActivated="False" Topmost="True" Focusable="False" IsHitTestVisible="False"
+        FontFamily="{StaticResource Font.Text}" UseLayoutRounding="True">
+    <!-- A pill above the taskbar while the puck turns the volume: Windows only shows its own
+         volume flyout for the volume keys, not for changes made through the Core Audio API. -->
+    <Border x:Name="Pill" Margin="10" CornerRadius="28" Background="{DynamicResource Brush.Popup}"
+            BorderBrush="{DynamicResource Brush.StrokeStrong}" BorderThickness="1" Padding="18,0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.3" />
+        </Border.Effect>
+        <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="Glyph" Text="&#xE767;" Style="{StaticResource Text.Icon}" FontSize="18" />
+            <ProgressBar x:Name="Bar" Grid.Column="1" Margin="14,0,14,0" Minimum="0" Maximum="100" Value="50" VerticalAlignment="Center" />
+            <TextBlock x:Name="Number" Grid.Column="2" Text="50" FontSize="15" FontWeight="SemiBold" MinWidth="28" TextAlignment="Right" Margin="0,0,2,0"
+                       Foreground="{DynamicResource Brush.Text}" VerticalAlignment="Center" />
+        </Grid>
+    </Border>
+</Window>

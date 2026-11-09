@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Claude (voice chat), Claude Code approvals, DialKit / game pages, and Teams. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>Puck.Integrations</RootNamespace>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Kestrel, for the Claude Code hook endpoint and the DialKit WebSocket on 127.0.0.1 -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Puck.Core\Puck.Core.csproj" />
+    <ProjectReference Include="..\PuckHook\PuckHook.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.58.0" />
+    <PackageReference Include="System.Speech" Version="10.0.13" />
+  </ItemGroup>
+
+  <!-- On `dotnet build`, puck-hook.exe travels with this assembly into the app's folder, where the
+       "Install Claude Code hook" button expects it. `dotnet publish` leaves it out: scripts/build.ps1
+       publishes a standalone puck-hook.exe there instead. -->
+  <Target Name="IncludePuckHook" BeforeTargets="AssignTargetPaths" Condition="'$(_IsPublishing)' != 'true'">
+    <MSBuild Projects="..\PuckHook\PuckHook.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_PuckHookTarget" />
+    </MSBuild>
+    <PropertyGroup>
+      <_PuckHookDir>@(_PuckHookTarget->'%(RootDir)%(Directory)')</_PuckHookDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <None Include="$(_PuckHookDir)puck-hook.exe;$(_PuckHookDir)puck-hook.dll;$(_PuckHookDir)puck-hook.runtimeconfig.json;$(_PuckHookDir)puck-hook.deps.json"
+            Condition="Exists('$(_PuckHookDir)puck-hook.exe')" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>

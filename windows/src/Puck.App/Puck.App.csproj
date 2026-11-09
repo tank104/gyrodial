@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The tray app: finds the puck over USB or Bluetooth LE, and turns what it says into volume,
+       media keys, mouse input and the integrations. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <RootNamespace>Puck.App</RootNamespace>
+    <AssemblyName>Puck</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- WFO0003 wants WinForms' DPI API instead of the manifest, but this is a WPF app (WinForms is
+         only the tray icon) and WPF takes PerMonitorV2 from the manifest. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <!-- `dotnet build -p:NoIntegrations=true` builds the app without Puck.Integrations (and so without
+       puck-hook, which Puck.Integrations brings into the output folder). -->
+  <PropertyGroup Condition="'$(NoIntegrations)' == 'true'">
+    <DefineConstants>$(DefineConstants);NO_INTEGRATIONS</DefineConstants>
+  </PropertyGroup>
+
+  <!-- WPF and WinForms both define Application, Button, MessageBox...: only WPF is imported
+       everywhere; the tray icon code names System.Windows.Forms explicitly. -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Puck.Core\Puck.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(NoIntegrations)' != 'true'">
+    <ProjectReference Include="..\Puck.Integrations\Puck.Integrations.csproj" />
+  </ItemGroup>
+
+  <!-- The firmware the installer flashes (put there by build.ps1: *.bin + manifest.json), and an
+       optional bundled esptool.exe. Both are copied next to Puck.exe when present. -->
+  <ItemGroup>
+    <None Update="firmware\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="tools\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

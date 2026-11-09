@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Puck Installer</title>
+  <meta name="description" content="Install the Puck firmware on a Waveshare ESP32-S3-Touch-AMOLED-1.75C from your browser.">
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    :root {
+      --bg: #f6f6f4; --card: #ffffff; --ink: #141414; --mute: #5e5e63; --line: rgba(0, 0, 0, 0.08);
+      --accent: #ffd60a; --accent-ink: #141414; --puck: #0b0b0c;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b0b0c; --card: #161618; --ink: #f5f5f7; --mute: #a1a1a6; --line: rgba(255, 255, 255, 0.08); --puck: #000;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b0b0c; --card: #161618; --ink: #f5f5f7; --mute: #a1a1a6; --line: rgba(255, 255, 255, 0.08); --puck: #000;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 500 16px/1.55 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 720px; margin: 0 auto; padding: 72px 16px 64px; }
+    .hero { display: flex; align-items: center; gap: 28px; }
+    .puck {
+      flex: none; width: 112px; height: 112px; border-radius: 50%; background: var(--puck);
+      box-shadow: 0 0 0 6px #2a2a2d, 0 0 0 7px #3a3a3e, 0 18px 40px rgba(0, 0, 0, 0.25);
+      display: grid; place-items: center; position: relative;
+    }
+    .puck::before {
+      content: ""; position: absolute; inset: 10px; border-radius: 50%;
+      background: conic-gradient(var(--accent) 0 62%, transparent 62% 100%);
+      -webkit-mask: radial-gradient(circle, transparent 41px, #000 42px); mask: radial-gradient(circle, transparent 41px, #000 42px);
+      transform: rotate(-112deg);
+    }
+    .puck span { color: #f5f5f7; font-weight: 800; font-size: 30px; letter-spacing: -0.02em; }
+    h1 { margin: 0; font-size: 34px; line-height: 1.15; letter-spacing: -0.02em; }
+    .lede { margin: 6px 0 0; color: var(--mute); font-size: 18px; }
+    ol { list-style: none; margin: 48px 0 0; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+    li {
+      display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: 16px;
+      background: var(--card); border: 1px solid var(--line); counter-increment: step;
+    }
+    li::before {
+      content: counter(step); flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: 14px;
+    }
+    li p { margin: 0; color: var(--mute); }
+    li b { color: var(--ink); }
+    a { color: inherit; text-underline-offset: 3px; }
+    .install { margin-top: 14px; }
+    button.cta, esp-web-install-button button {
+      appearance: none; border: 0; border-radius: 999px; padding: 11px 22px; cursor: pointer;
+      background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 700;
+    }
+    esp-web-install-button:not(:defined) { display: none; }
+    .note { margin-top: 10px; font-size: 14px; color: var(--mute); }
+    .warn { display: none; margin-top: 10px; font-size: 14px; color: #c0392b; }
+    footer { margin-top: 56px; color: var(--mute); font-size: 14px; }
+    @media (max-width: 560px) {
+      main { padding-top: 40px; }
+      .hero { flex-direction: column; align-items: flex-start; gap: 20px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero">
+      <div class="puck" aria-hidden="true"><span>62</span></div>
+      <div>
+        <h1>Puck for Windows</h1>
+        <p class="lede">A round dial for your desk. Turn it for volume, flip it to a trackpad, talk to Claude, approve Claude Code.</p>
+      </div>
+    </div>
+
+    <ol>
+      <li><p><b>Get the board.</b> A <a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.75c.htm">Waveshare ESP32-S3-Touch-AMOLED-1.75C</a>. Nothing to solder.</p></li>
+      <li>
+        <div>
+          <p><b>Install the firmware.</b> Plug the board into this PC with a USB-C data cable, then click Install and pick the port named <i>USB JTAG/serial debug unit</i>.</p>
+          <div class="install">
+            <esp-web-install-button manifest="firmware/manifest.json">
+              <button slot="activate" class="cta">Install</button>
+              <span slot="unsupported">This browser can't talk to USB devices. Use Chrome or Edge.</span>
+              <span slot="not-allowed">Installing needs https (or localhost).</span>
+            </esp-web-install-button>
+          </div>
+          <p class="note">If it can't connect, hold BOOT while plugging the board in, then try again.</p>
+        </div>
+      </li>
+      <li><p><b>Run the Puck app.</b> It finds the puck over USB or Bluetooth. To pair, turn the puck to each number it shows and tap.</p></li>
+    </ol>
+
+    <footer>The firmware runs on ESP32-S3; the app needs Windows 10 (2004) or later.</footer>
+  </main>
+</body>
+</html>
