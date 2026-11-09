@@ -1,5 +1,5 @@
-// Pair: a PC this puck doesn't know wants to connect. Dial in three numbers, like a combination
-// lock: turn to each one and tap. It proves someone is holding this puck. The side button says no.
+// Pair: a PC this dial doesn't know wants to connect. Dial in three numbers, like a combination
+// lock: turn to each one and tap. It proves someone is holding this dial. The side button says no.
 // When it ends, a card says how (paired, cancelled, or stopped) for a moment before leaving.
 #include <stdio.h>
 #include <stdlib.h>

@@ -17,7 +17,7 @@ bool g_quiet = false;
 static bool s_displayOn = true;
 static int s_bright = 80;
 
-extern "C" uint32_t nowMs(void) { return g_now; }  // puck_clock.h, as the board would
+extern "C" uint32_t nowMs(void) { return g_now; }  // gyrodial_clock.h, as the board would
 
 static void flush(lv_disp_drv_t* d, const lv_area_t* a, lv_color_t* px) {
   for (int y = a->y1; y <= a->y2; y++)

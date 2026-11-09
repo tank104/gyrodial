@@ -29,7 +29,7 @@ bool pollEvent(InputEvent& out);        // non-blocking; pops the next event for
 void setInputMode(InputMode mode);      // faces call this when the trackpad face is entered/left
 InputMode inputMode();
 float heading();                        // total degrees turned since boot (clockwise +), drift-corrected
-bool lifted();                          // true when the puck is held up (screen not facing up)
+bool lifted();                          // true when the dial is held up (screen not facing up)
 uint32_t lastActivityMs();              // nowMs() of the last touch, turn, button or motion
 void setTurnSensitivity(float k);       // multiplies Turn values (from cfg.sens)
 void setTurnFlip(bool flip);            // reverses Turn direction (from cfg.flip)

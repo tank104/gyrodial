@@ -1,5 +1,5 @@
 #include "model.h"
-#include "puck_clock.h"
+#include "gyrodial_clock.h"
 #include <atomic>
 
 Model g_model;

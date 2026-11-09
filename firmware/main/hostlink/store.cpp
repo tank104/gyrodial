@@ -1,10 +1,12 @@
-// What survives a reboot: the hosts this puck is paired with, and the last cfg the app sent
+// What survives a reboot: the hosts this dial is paired with, and the last cfg the app sent
 // (so brightness, sound and turn direction are right before any PC connects).
 // Everything here runs in the main loop.
 #include <string.h>
 #include <algorithm>
+#include <initializer_list>
+#include <esp_log.h>
 #include <nvs.h>
-#include "puck_clock.h"
+#include "gyrodial_clock.h"
 #include "../config.h"
 #include "../hal.h"
 #include "../model.h"
@@ -14,6 +16,8 @@ namespace hostlink {
 namespace detail {
 
 namespace {
+constexpr const char* kNamespace = "gyrodial";
+constexpr const char* kOldNamespace = "puck";  // before 0.3.0
 
 struct HostRecord {
   char id[17];
@@ -96,8 +100,31 @@ void copyText(char* dst, size_t size, const char* src) {
   dst[n] = 0;
 }
 
+// Firmware before 0.3.0 (when the project was called Puck) kept the paired hosts and the settings
+// in the "puck" namespace. Moves them to ours once, so an update keeps its pairings.
+static void migrateOldNamespace() {
+  nvs_handle_t old;
+  if (nvs_open(kOldNamespace, NVS_READWRITE, &old) != ESP_OK) return;  // nothing there
+  size_t moved = 0;
+  for (const char* key : {"hosts", "cfg"}) {
+    size_t len = 0;
+    if (nvs_get_blob(old, key, nullptr, &len) != ESP_OK || len == 0 || len > 1024) continue;
+    size_t have = 0;
+    if (nvs_get_blob(s_nvs, key, nullptr, &have) == ESP_OK) continue;  // already ours: keep it
+    uint8_t buf[1024];
+    if (nvs_get_blob(old, key, buf, &len) == ESP_OK && nvs_set_blob(s_nvs, key, buf, len) == ESP_OK) moved++;
+  }
+  if (nvs_commit(s_nvs) == ESP_OK) {
+    nvs_erase_all(old);
+    nvs_commit(old);
+  }
+  nvs_close(old);
+  if (moved) ESP_LOGI("store", "moved %u settings from the old \"%s\" namespace", (unsigned)moved, kOldNamespace);
+}
+
 void storeBegin() {
-  s_open = nvs_open("puck", NVS_READWRITE, &s_nvs) == ESP_OK;
+  s_open = nvs_open(kNamespace, NVS_READWRITE, &s_nvs) == ESP_OK;
+  if (s_open) migrateOldNamespace();
   HostTable t = {};
   if (getBlob("hosts", &t, sizeof(t)) && t.version == kHostsVersion && t.count <= PAIR_MAX_HOSTS) {
     s_table = t;

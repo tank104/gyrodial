@@ -1,4 +1,4 @@
-// The face simulator: drives the real faces through a script of PC states and puck gestures, and
+// The face simulator: drives the real faces through a script of PC states and dial gestures, and
 // writes what the glass shows to tools/sim/out/*.png (plus out/sheet.png with all of them).
 #include <lvgl.h>
 #include <stdio.h>
@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
   run(400);
   snap("23_claude_reply_scrolled");
   g_model.claude = ClaudeState::Error;
-  SET(g_model.claudeText, "Add your Claude API key in Puck settings on your PC");
+  SET(g_model.claudeText, "Add your Claude API key in Gyrodial settings on your PC");
   mark(D_CLAUDE);
   run(500);
   snap("24_claude_error");
@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
   SET(g_model.askTool, "github: create_pull_request");
   SET(g_model.askText,
       "{\"owner\":\"tank104\",\"repo\":\"gyrodial\",\"title\":\"Pairing: show progress on both sides\","
-      "\"head\":\"pairing-progress\",\"base\":\"main\",\"body\":\"The puck reports each number as it is dialled "
+      "\"head\":\"pairing-progress\",\"base\":\"main\",\"body\":\"The dial reports each number as it is dialled "
       "in, and the app mirrors it. Also adds a result card.\"}");
   SET(g_model.askProj, "gyrodial");
   mark(D_ASK);

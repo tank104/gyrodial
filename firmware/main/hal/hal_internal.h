@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <esp_log.h>
-#include "puck_clock.h"
+#include "gyrodial_clock.h"
 #include "../events.h"
 #include "../hal.h"
 

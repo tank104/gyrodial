@@ -11,7 +11,7 @@
 #include <atomic>
 #include <initializer_list>
 #include <math.h>
-#include "puck_clock.h"
+#include "gyrodial_clock.h"
 #include "../config.h"
 #include "internal.h"
 

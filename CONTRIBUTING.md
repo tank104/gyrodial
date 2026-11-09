@@ -5,7 +5,7 @@ are all welcome.
 
 ## Before you start
 
-- **Bugs:** open an issue with the bug template. If the puck is involved, include the line it sends
+- **Bugs:** open an issue with the bug template. If the dial is involved, include the line it sends
   back for `{"t":"diag"}` ([how](docs/HARDWARE.md#diagnostics)).
 - **Anything bigger than a fix** (a new face, an integration, a protocol change): open an issue
   first, so we can agree on the shape before you spend time on it.
@@ -26,12 +26,12 @@ You don't need a board to work on the app, the integrations or the faces.
 Everything at once (firmware, then the app with that firmware bundled in):
 
 ```powershell
-./scripts/build.ps1                  # → dist/Puck/ and dist/Puck-win-x64.zip
+./scripts/build.ps1                  # → dist/Gyrodial/ (the app) and dist/Gyrodial-win-x64.zip
 ./scripts/build.ps1 -SkipFirmware    # app only, reusing the last firmware build
 ```
 
 `build.ps1` finds ESP-IDF in `-IdfPath`, `$env:IDF_PATH` or `~/esp/esp-idf`. It copies the firmware
-images into the app (`windows/src/Puck.App/firmware`) and the web installer (`web/firmware`), along
+images into the app (`windows/src/Gyrodial.App/firmware`) and the web installer (`web/firmware`), along
 with an ESP Web Tools `manifest.json`.
 
 Or piece by piece:
@@ -39,9 +39,9 @@ Or piece by piece:
 ```powershell
 cd firmware; idf.py build                    # firmware, in an ESP-IDF shell
 idf.py -p COM5 flash                         # flash it (use your board's port)
-dotnet build windows/Puck.sln                # app, integrations, puck-hook
-dotnet test windows/Puck.sln                 # integration tests
-windows/src/Puck.App/bin/Debug/net10.0-windows10.0.22621.0/Puck.exe --self-test   # link logic against a fake puck
+dotnet build windows/Gyrodial.sln                # app, integrations, gyrodial-hook
+dotnet test windows/Gyrodial.sln                 # integration tests
+windows/src/Gyrodial.App/bin/Debug/net10.0-windows10.0.22621.0/Gyrodial.exe --self-test   # link logic against a fake dial
 ```
 
 **The face simulator** compiles the real face code (`firmware/main/ui`) and LVGL against a pretend
@@ -62,17 +62,19 @@ before/after images in your pull request.
 | Path | What |
 |---|---|
 | `VERSION` | The version of both the firmware and the app |
-| `docs/PROTOCOL.md` | The wire protocol between the puck and the app (NDJSON over USB serial or BLE) |
+| `docs/PROTOCOL.md` | The wire protocol between the dial and the app (NDJSON over USB serial or BLE) |
 | `docs/HARDWARE.md` | The board, orientation constants, diagnostics, logs, backups |
 | `firmware/` | The ESP-IDF project (`sdkconfig.defaults`, `partitions.csv`, LVGL from the component registry, cJSON built into IDF) |
 | `firmware/main/hal` | The board: CO5300 QSPI display and LVGL port, CST9217 touch, QMI8658 motion, AXP2101 power, ES8311 sound, on IDF's own drivers |
 | `firmware/main/hostlink` | The USB and BLE (NimBLE) links, pairing, and the protocol |
 | `firmware/main/ui` | The faces |
 | `firmware/tools/sim` | The desktop face simulator |
-| `windows/src/Puck.Core` | Shared contracts: protocol messages, settings, the integration interfaces |
-| `windows/src/Puck.App` | The tray app: transports, pairing, volume/media/mouse, flyout, settings, firmware installer |
-| `windows/src/Puck.Integrations` | Claude voice chat, Claude Code approvals, the DialKit/game bridge, Teams |
-| `windows/src/PuckHook` | `puck-hook.exe`, the Claude Code hook command |
+| `windows/src/Gyrodial.Core` | Shared contracts: protocol messages, settings, the integration interfaces |
+| `windows/src/Gyrodial.App` | The tray app: transports, pairing, volume/media/mouse, flyout, settings, firmware installer |
+| `windows/src/Gyrodial.Integrations` | Claude voice chat, Claude Code approvals, the DialKit/game bridge, Teams |
+| `windows/src/GyrodialHook` | `gyrodial-hook.exe`, the Claude Code hook command |
+| `windows/installer` | The Windows installer (Inno Setup), built by the release workflow |
+| `docs/release` | Files that go into a release |
 | `web/` | The browser firmware installer (ESP Web Tools), published to GitHub Pages |
 | `scripts/build.ps1` | Builds and packages everything |
 
@@ -81,7 +83,7 @@ before/after images in your pull request.
 - **The firmware is plain ESP-IDF:** no Arduino core and no PlatformIO. Use IDF's drivers and
   components.
 - **The protocol has two sides.** If you change a message, update the firmware, the app and
-  `docs/PROTOCOL.md` in the same pull request. The puck must ignore what it doesn't understand,
+  `docs/PROTOCOL.md` in the same pull request. The dial must ignore what it doesn't understand,
   because anything in Bluetooth range can send it a line.
 - **Match the code around you.** Keep changes focused: one topic per pull request.
 - **Add or update tests** in `windows/tests` for app and integration logic.
@@ -91,31 +93,42 @@ before/after images in your pull request.
 ## Pull requests
 
 1. Fork the repository and make a branch.
-2. Make sure `dotnet test windows/Puck.sln` passes and the firmware builds.
+2. Make sure `dotnet test windows/Gyrodial.sln` passes and the firmware builds.
 3. Open a pull request and fill in the template. Say how you tested it, and on what hardware if any.
 
-CI builds the firmware and the app and runs the tests on every pull request. For a contributor
-from outside the project, a maintainer approves the CI run first. A maintainer reviews every pull
-request and merges it (squashed into one commit) once CI passes. `main` can't be pushed to directly
-by contributors.
+Every change to `main` goes through a pull request, the maintainer's own included: nobody pushes to
+`main` directly. On every pull request, CI:
+
+- builds the firmware with ESP-IDF
+- builds the face simulator from the same UI code and renders every face (download the `faces`
+  image from the run to see them)
+- builds the app and runs the unit tests
+- runs `Gyrodial.exe --self-test` (the connection logic against a fake dial)
+
+A pull request can be merged only when all of that passes and the branch is up to date with `main`
+(GitHub's *Update branch* button does that). For contributors from outside the project, a
+maintainer approves the CI run first. The maintainer reviews every pull request and merges it,
+squashed into one commit.
 
 By contributing, you agree that your contribution is licensed under the project's
 [MIT license](LICENSE).
 
 ## Releasing (maintainers)
 
-1. Set the new version in `VERSION` (for example `0.3.0`) and merge that to `main`.
-2. Tag it and push the tag:
+1. Set the new version in `VERSION` (for example `0.3.0`) in a pull request, and merge it.
+2. Tag the merged commit on `main` and push the tag:
    ```powershell
+   git switch main; git pull
    git tag v0.3.0
    git push origin v0.3.0
    ```
 3. The **release** workflow checks that the tag matches `VERSION`, builds the firmware and the app,
    and creates a **draft** release with:
-   - `Puck-<version>-win-x64.zip`: the app, with this firmware bundled
-   - `puck-firmware-<version>.zip`: the flash images and the ESP Web Tools manifest
-   - `puck-firmware-<version>-merged.bin`: one image to write at `0x0` with any flashing tool
-   - `puck-<version>.elf`: for decoding crash dumps
+   - `Gyrodial-Setup-<version>.exe`: the Windows app's installer (Inno Setup,
+     `windows/installer/Gyrodial.iss`), with this firmware inside
+   - `Gyrodial-<version>-firmware.zip`: the flash images, one merged image for `0x0`, the ESP Web
+     Tools manifest, `gyrodial.elf` for decoding crash dumps, and `FLASHING.txt`
+     (`docs/release/FLASHING.txt`)
    - `SHA256SUMS.txt`
 4. Check the draft, edit the notes, and click **Publish**. Publishing a release (not a pre-release)
    also updates the web installer on GitHub Pages to that firmware.

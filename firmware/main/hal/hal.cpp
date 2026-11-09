@@ -160,7 +160,7 @@ void setDisplayOn(bool on) {
 bool displayOn() { return s_displayOn; }
 
 uint64_t chipId() {
-  // The factory MAC's six bytes in memory order, as a little-endian number (what the puck's id
+  // The factory MAC's six bytes in memory order, as a little-endian number (what the dial's id
   // has always been built from).
   uint64_t id = 0;
   esp_efuse_mac_get_default(reinterpret_cast<uint8_t*>(&id));

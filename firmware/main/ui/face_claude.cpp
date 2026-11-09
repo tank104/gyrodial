@@ -1,4 +1,4 @@
-// Claude: tap, talk, tap to send. The words are recognized on the PC; the puck shows the spark, the
+// Claude: tap, talk, tap to send. The words are recognized on the PC; the dial shows the spark, the
 // live transcript, and then the answer (turn or swipe to scroll it). Hold to cancel.
 #include <stdio.h>
 #include <string.h>
@@ -94,7 +94,7 @@ void layoutState(bool force) {
 
   switch (s) {
     case ClaudeState::Idle:
-      setText(status, linked ? "Tap to talk" : "Connect Puck to your PC");
+      setText(status, linked ? "Tap to talk" : "Connect Gyrodial to your PC");
       setText(hint, "");
       break;
     case ClaudeState::Listening:

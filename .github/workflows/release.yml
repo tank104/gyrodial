@@ -3,6 +3,11 @@ name: release
 # Pushing a tag v<VERSION> (for example v0.3.0) builds the firmware and the app and creates a
 # draft release, for a maintainer to check and publish. Running this workflow by hand builds the
 # same files and attaches them to the run, without creating a release.
+#
+# The release has three files:
+#   Gyrodial-Setup-<version>.exe     the Windows app's installer, with this firmware inside
+#   Gyrodial-<version>-firmware.zip  the firmware for flashing it yourself (and the web installer)
+#   SHA256SUMS.txt
 on:
   push:
     tags: ["v*"]
@@ -33,7 +38,7 @@ jobs:
           esp_idf_version: v5.5.3
           target: esp32s3
           path: firmware
-          command: idf.py build && idf.py merge-bin -o puck-merged.bin
+          command: idf.py build && idf.py merge-bin -o gyrodial-merged.bin
       - uses: actions/upload-artifact@v4
         with:
           name: firmware-build
@@ -42,9 +47,9 @@ jobs:
             firmware/build/bootloader/bootloader.bin
             firmware/build/partition_table/partition-table.bin
             firmware/build/ota_data_initial.bin
-            firmware/build/puck.bin
-            firmware/build/puck.elf
-            firmware/build/puck-merged.bin
+            firmware/build/gyrodial.bin
+            firmware/build/gyrodial.elf
+            firmware/build/gyrodial-merged.bin
             firmware/build/flasher_args.json
             firmware/build/project_description.json
 
@@ -63,23 +68,33 @@ jobs:
           name: firmware-build
           path: firmware/build
       - name: Test
-        run: dotnet test windows/Puck.sln -c Release
-      - name: Package the app with this firmware
+        run: dotnet test windows/Gyrodial.sln -c Release
+      - name: Publish the app with this firmware
         shell: pwsh
         run: ./scripts/build.ps1 -SkipFirmware
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup --no-progress -y | Out-Null }
+          New-Item -ItemType Directory -Force release | Out-Null
+          & $iscc /Qp "/DAppVersion=$env:VERSION" "/DSourceDir=$PWD\dist\Gyrodial" "/DOutputDir=$PWD\release" windows\installer\Gyrodial.iss
+          if ($LASTEXITCODE -ne 0) { throw "The installer build failed" }
       - name: Collect the release files
         shell: pwsh
         run: |
           $v = $env:VERSION
-          New-Item -ItemType Directory -Force release | Out-Null
-          Copy-Item dist/Puck-win-x64.zip "release/Puck-$v-win-x64.zip"
-          Compress-Archive -Path web/firmware/* -DestinationPath "release/puck-firmware-$v.zip"
-          Copy-Item firmware/build/puck-merged.bin "release/puck-firmware-$v-merged.bin"
-          Copy-Item firmware/build/puck.elf "release/puck-$v.elf"
+          # The firmware zip: the web installer's files, one merged image, debug symbols, and how to flash
+          $fw = New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\firmware"
+          Copy-Item web/firmware/* $fw
+          Copy-Item firmware/build/gyrodial-merged.bin, firmware/build/gyrodial.elf $fw
+          (Get-Content docs/release/FLASHING.txt -Raw).Replace("{VERSION}", $v) | Set-Content "$fw\FLASHING.txt" -NoNewline
+          Compress-Archive -Path "$fw\*" -DestinationPath "release/Gyrodial-$v-firmware.zip"
           $sums = Get-ChildItem release -File | Sort-Object Name | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
           }
-          Set-Content release/SHA256SUMS.txt -Value $sums -Encoding ascii
+          # \n line endings, so `sha256sum -c SHA256SUMS.txt` works too
+          [IO.File]::WriteAllText("$PWD/release/SHA256SUMS.txt", ($sums -join "`n") + "`n")
           Get-ChildItem release | Format-Table Name, Length
       - uses: actions/upload-artifact@v4
         with:
@@ -104,9 +119,23 @@ jobs:
       - name: Create a draft release
         run: |
           cat > notes.md <<NOTES
-          **Install:** download \`Puck-$VERSION-win-x64.zip\`, unzip it, and run \`Puck.exe\`. Then install the firmware from *Settings → Firmware* in the app, or from the [web installer](https://tank104.github.io/gyrodial/). The app isn't code-signed yet, so Windows SmartScreen may warn you: choose *More info → Run anyway*.
+          ## Install
 
-          **Other files:** \`puck-firmware-$VERSION.zip\` has the flash images and an ESP Web Tools manifest. \`puck-firmware-$VERSION-merged.bin\` is one image to write at \`0x0\` with any flashing tool. \`puck-$VERSION.elf\` decodes crash dumps. \`SHA256SUMS.txt\` has the checksums.
+          1. Download **\`Gyrodial-Setup-$VERSION.exe\`** below and run it. It installs the Windows app for you (no admin rights needed). Windows may warn you because the installer isn't code-signed yet: choose *More info → Run anyway*.
+          2. Plug in your Waveshare ESP32-S3-Touch-AMOLED-1.75C, open Gyrodial from the tray icon, and go to *Settings → Firmware → Install*. Or install the firmware from your browser with the [web installer](https://tank104.github.io/gyrodial/).
+          3. Turn the dial to each number it shows and tap, to pair it with your PC.
+
+          The full guide is in the [README](https://github.com/tank104/gyrodial#install-no-building-needed).
+
+          ## Files
+
+          | File | What it is |
+          |---|---|
+          | \`Gyrodial-Setup-$VERSION.exe\` | **The Windows app.** The installer includes this version's firmware, so the app can flash your board. |
+          | \`Gyrodial-$VERSION-firmware.zip\` | The firmware on its own, to flash with esptool (instructions inside). You don't need it if you use the app or the web installer. |
+          | \`SHA256SUMS.txt\` | Checksums of the files above. |
+
+          GitHub adds the *Source code* archives to every release; you don't need them to install.
           NOTES
           gh release create "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" \
-            --draft --verify-tag --title "Puck $VERSION" --notes-file notes.md --generate-notes
+            --draft --verify-tag --title "Gyrodial $VERSION" --notes-file notes.md --generate-notes
