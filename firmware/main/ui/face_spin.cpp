@@ -1,5 +1,5 @@
 // Spin: a wheel of eight and a needle. Tap to spin it (it slows on its own and lands on a number),
-// or turn the puck to move the needle by hand.
+// or turn the dial to move the needle by hand.
 #include <stdio.h>
 #include "ui_common.h"
 

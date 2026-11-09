@@ -15,9 +15,9 @@ release, or on `main`, before reporting it.
 
 ## What's worth reporting
 
-Puck runs on your PC and listens for input from a few places. These are the places that matter most:
+Gyrodial runs on your PC and listens for input from a few places. These are the places that matter most:
 
-- **Bluetooth:** any Bluetooth LE device in range can connect to the puck and send it lines.
+- **Bluetooth:** any Bluetooth LE device in range can connect to the dial and send it lines.
   Crashing it, hanging it, or getting past pairing over BLE is in scope.
 - **Local endpoints:** the Claude Code hook endpoint and the DialKit bridge
   (`ws://127.0.0.1:47824/bridge`). Web pages from other sites must not reach them, and forged

@@ -1,4 +1,4 @@
-// Everything the puck knows about the computer it's paired with. Written only by hostlink (from the
+// Everything the dial knows about the computer it's paired with. Written only by hostlink (from the
 // main loop), read by the faces. Fields that changed are reported through the dirty bits.
 #pragma once
 #include <stdint.h>

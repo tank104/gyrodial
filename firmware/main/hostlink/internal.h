@@ -58,7 +58,7 @@ void onBleConnected();
 void onBleSubscribed();
 void onBleDisconnected();
 
-// ---- store.cpp: NVS ("puck" namespace)
+// ---- store.cpp: NVS ("gyrodial" namespace; moved from "puck", the name before 0.3.0)
 void storeBegin();
 bool storeHasHost(const char* id);
 void storeAddHost(const char* id, const char* name);  // adds or refreshes; evicts the oldest

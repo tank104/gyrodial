@@ -5,8 +5,8 @@
     <LangVersion>latest</LangVersion>
     <!-- One version for the app and the firmware: ../VERSION (release tags are v<VERSION>) -->
     <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\VERSION').Trim())</Version>
-    <Company>Puck</Company>
-    <Product>Puck for Windows</Product>
+    <Company>Gyrodial</Company>
+    <Product>Gyrodial</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 </Project>

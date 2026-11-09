@@ -1,4 +1,4 @@
-// Motion: the QMI8658 gyro + accelerometer. Turning the puck (the dial), lifting it, shaking it,
+// Motion: the QMI8658 gyro + accelerometer. Turning the dial (the dial), lifting it, shaking it,
 // and, in trackpad mode while it's held up, aiming it like a pointer.
 #include <math.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@ namespace {
 static const char* TAG = "hal";
 
 // ---- orientation assumptions (check on the real board; flip a sign here if one is backwards)
-// The accelerometer reads +1 g on z when the puck lies screen-up (IMU z axis out of the screen).
+// The accelerometer reads +1 g on z when the dial lies screen-up (IMU z axis out of the screen).
 constexpr float kScreenUpZ = +1.0f;
 // Pointer: hand turned right moves the mouse right, nose up moves it up. These follow from the
 // math below when the axes are as assumed; they're here so a mirrored board needs one edit.
@@ -268,12 +268,12 @@ void updateActivity(const float w[3], float amag, uint32_t now) {
 }
 
 // Held up and aimed at the screen: the hand's yaw moves the pointer sideways, its pitch up/down.
-// u: up (gravity reaction) in device axes. f: where the puck points, out of its back (-z when the
+// u: up (gravity reaction) in device axes. f: where the dial points, out of its back (-z when the
 // screen faces the user). r = f x u points to the user's right. Yaw is rotation about u, pitch
 // about r (right-hand rule: positive yaw turns left, positive pitch raises the nose).
 void updatePointer(const float a[3], const float w[3], float amag, float dt, uint32_t now) {
   if (s_mode != InputMode::Trackpad || !s_lifted.load() || amag < 0.5f) return;
-  // Tapping the glass to click jolts the puck: hold the pointer still during a tap and just after,
+  // Tapping the glass to click jolts the dial: hold the pointer still during a tap and just after,
   // so the click lands where you aimed. A thumb resting on the glass doesn't freeze it.
   if (tapInProgress(now / 1000, kTapFreezeMs)) {
     s_yawF = s_pitchF = 0;
@@ -322,7 +322,7 @@ bool motionBegin() {
   s_ok = true;
   sleepMs(60);  // first samples after enabling are settling
 
-  // Seed the gyro bias from a short still average (the puck usually boots lying on a desk). If
+  // Seed the gyro bias from a short still average (the dial usually boots lying on a desk). If
   // it's being handled, start from zero and let the running estimate catch up.
   float sum[3] = {0, 0, 0}, sumSq = 0, a[3], w[3];
   int n = 0;

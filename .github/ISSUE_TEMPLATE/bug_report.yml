@@ -1,5 +1,5 @@
 name: Bug report
-description: Something on the puck or in the app doesn't work as it should.
+description: Something on the dial or in the app doesn't work as it should.
 labels: [bug]
 body:
   - type: textarea
@@ -15,7 +15,7 @@ body:
       label: How to make it happen
       placeholder: |
         1. Open the trackpad face
-        2. Lift the puck
+        2. Lift the dial
         3. ...
     validations:
       required: true
@@ -30,7 +30,7 @@ body:
   - type: dropdown
     id: link
     attributes:
-      label: How is the puck connected?
+      label: How is the dial connected?
       options:
         - USB
         - Bluetooth
@@ -52,5 +52,5 @@ body:
     attributes:
       label: Diagnostics
       description: |
-        If the puck is involved, send `{"t":"diag"}` to its COM port and paste the line it sends back (see docs/HARDWARE.md). Logs from the app or the firmware's UART help too.
+        If the dial is involved, send `{"t":"diag"}` to its COM port and paste the line it sends back (see docs/HARDWARE.md). Logs from the app or the firmware's UART help too.
       render: text

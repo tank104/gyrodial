@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-  Builds the Puck firmware and the Windows app, and packages both.
+  Builds the Gyrodial firmware and the Windows app, and packages both.
 
 .DESCRIPTION
   1. Builds the firmware with ESP-IDF (idf.py build in firmware/).
   2. Copies the flash images + an ESP Web Tools manifest into
-     windows/src/Puck.App/firmware (the app's installer) and web/firmware (the browser installer).
-  3. Publishes the app (self-contained, win-x64) with puck-hook.exe next to it into dist/Puck,
-     and zips it to dist/Puck-win-x64.zip.
+     windows/src/Gyrodial.App/firmware (the app's installer) and web/firmware (the browser installer).
+  3. Publishes the app (self-contained, win-x64) with gyrodial-hook.exe next to it into dist/Gyrodial,
+     and zips it to dist/Gyrodial-win-x64.zip.
 
   ESP-IDF v5.5 must be installed. If idf.py isn't already on PATH (an "ESP-IDF PowerShell"
   window), the script loads it from -IdfPath, $env:IDF_PATH, or ~/esp/esp-idf.
@@ -67,7 +67,7 @@ if (Test-Path $flasherArgs) {
         $parts += [ordered]@{ path = (Split-Path $p.Value -Leaf); offset = [Convert]::ToInt32($p.Name, 16); source = (Join-Path $fwBuild $p.Value) }
     }
     $manifest = [ordered]@{
-        name = "Puck"
+        name = "Gyrodial"
         version = $version
         new_install_prompt_erase = $true
         builds = @(@{
@@ -76,7 +76,7 @@ if (Test-Path $flasherArgs) {
         })
     } | ConvertTo-Json -Depth 5
 
-    foreach ($dest in (Join-Path $root "windows/src/Puck.App/firmware"), (Join-Path $root "web/firmware")) {
+    foreach ($dest in (Join-Path $root "windows/src/Gyrodial.App/firmware"), (Join-Path $root "web/firmware")) {
         if (Test-Path $dest) { Remove-Item (Join-Path $dest "*") -Recurse -Force }
         New-Item -ItemType Directory -Force -Path $dest | Out-Null
         foreach ($part in $parts) { Copy-Item $part.source (Join-Path $dest $part.path) -Force }
@@ -89,20 +89,20 @@ if (Test-Path $flasherArgs) {
 
 # ---- app
 if (-not $SkipApp) {
-    $dist = Join-Path $root "dist/Puck"
+    $dist = Join-Path $root "dist/Gyrodial"
     if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
     Write-Host "Publishing the app..." -ForegroundColor Cyan
     Invoke-Checked "App publish" {
-        dotnet publish (Join-Path $root "windows/src/Puck.App/Puck.App.csproj") -c $Configuration -r win-x64 --self-contained true -o $dist
+        dotnet publish (Join-Path $root "windows/src/Gyrodial.App/Gyrodial.App.csproj") -c $Configuration -r win-x64 --self-contained true -o $dist
     }
-    # puck-hook.exe runs from Claude Code, which may start it before the app: make it stand alone.
+    # gyrodial-hook.exe runs from Claude Code, which may start it before the app: make it stand alone.
     # The app publish brought the framework-dependent build along; replace it with the single file.
-    Remove-Item (Join-Path $dist "puck-hook.*") -Force -ErrorAction SilentlyContinue
-    Invoke-Checked "puck-hook publish" {
-        dotnet publish (Join-Path $root "windows/src/PuckHook/PuckHook.csproj") -c $Configuration -r win-x64 --self-contained true `
+    Remove-Item (Join-Path $dist "gyrodial-hook.*") -Force -ErrorAction SilentlyContinue
+    Invoke-Checked "gyrodial-hook publish" {
+        dotnet publish (Join-Path $root "windows/src/GyrodialHook/GyrodialHook.csproj") -c $Configuration -r win-x64 --self-contained true `
             -p:PublishSingleFile=true -p:PublishTrimmed=true -o $dist
     }
-    $zip = Join-Path $root "dist/Puck-win-x64.zip"
+    $zip = Join-Path $root "dist/Gyrodial-win-x64.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $dist "*") -DestinationPath $zip
     Write-Host "Done: $zip" -ForegroundColor Green

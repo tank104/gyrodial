@@ -6,7 +6,7 @@
 
 <!-- What did you run or try? If you tested on a board, which one, and over USB or Bluetooth? -->
 
-- [ ] `dotnet test windows/Puck.sln` passes
+- [ ] `dotnet test windows/Gyrodial.sln` passes
 - [ ] The firmware builds (`idf.py build`), if I changed it
 - [ ] Tried on a real board (say which above), or not needed
 - [ ] Before/after images from the face simulator, if a face looks different

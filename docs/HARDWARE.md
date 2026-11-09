@@ -25,7 +25,7 @@ Each orientation-dependent behaviour is one named constant, in case a board need
 
 ## Diagnostics
 
-Send `{"t":"diag"}` over the puck's COM port (it's allowed before pairing). It answers with one line
+Send `{"t":"diag"}` over the dial's COM port (it's allowed before pairing). It answers with one line
 containing:
 
 - uptime and reset reason
@@ -42,10 +42,10 @@ Please include that line in bug reports.
 
 The USB port carries only the app's protocol. ESP-IDF's console (boot log, `ESP_LOGx` lines,
 panics) is on UART0: GPIO43 TX / GPIO44 RX, 115200 baud. It logs a line for each device that fails
-to start (touch, IMU, PMU, codec), and the puck keeps running without it.
+to start (touch, IMU, PMU, codec), and the dial keeps running without it.
 
 A crash is also saved to the `coredump` partition. Read it back over USB with
-`idf.py -p COM5 coredump-info`, using the `puck-<version>.elf` from the same release (or your own
+`idf.py -p COM5 coredump-info`, using the `gyrodial.elf` from the same release's firmware zip (or your own
 build) to decode it.
 
 ## Backing up the board
@@ -65,7 +65,7 @@ If the board won't enter download mode, hold **BOOT** while plugging it in.
 
 - Every chip starts.
 - Lying flat, it reads +0.96 g on z.
-- Its gyro sits about 15 °/s off zero on X. The puck learns that and removes it within a second of lying still.
+- Its gyro sits about 15 °/s off zero on X. The dial learns that and removes it within a second of lying still.
 - The PMU's fuel gauge reads nonsense, so battery % comes from the voltage.
 - Pairing starts, cancels and times out correctly over USB, and the app connects over Bluetooth too.
 - Touch (trackpad) and turning work by hand, and the air mouse's axes were tuned on it.

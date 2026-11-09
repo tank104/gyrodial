@@ -4,8 +4,8 @@ name: build
 # merged once both jobs pass:
 #   firmware: builds the firmware with ESP-IDF, then builds the face simulator from the same UI code
 #             and renders every face (attached to the run as "faces").
-#   windows:  builds the app, runs the unit tests, then runs Puck.exe --self-test (the connection
-#             logic against a fake puck).
+#   windows:  builds the app, runs the unit tests, then runs Gyrodial.exe --self-test (the connection
+#             logic against a fake dial).
 on:
   push:
     branches: [main]
@@ -35,7 +35,7 @@ jobs:
             firmware/build/bootloader/bootloader.bin
             firmware/build/partition_table/partition-table.bin
             firmware/build/ota_data_initial.bin
-            firmware/build/puck.bin
+            firmware/build/gyrodial.bin
             firmware/build/flasher_args.json
       - name: Face simulator (renders every face)
         working-directory: firmware/tools/sim
@@ -55,14 +55,14 @@ jobs:
         with:
           dotnet-version: "10.0.x"
       - name: Build
-        run: dotnet build windows/Puck.sln -c Release
+        run: dotnet build windows/Gyrodial.sln -c Release
       - name: Unit tests
-        run: dotnet test windows/Puck.sln -c Release --no-build
-      - name: Self-test (connection logic against a fake puck)
+        run: dotnet test windows/Gyrodial.sln -c Release --no-build
+      - name: Self-test (connection logic against a fake dial)
         shell: pwsh
         run: |
-          # Puck.exe is a GUI app: start it and wait, with its output going to a file
-          $exe = Resolve-Path windows/src/Puck.App/bin/Release/net10.0-windows10.0.22621.0/Puck.exe
+          # Gyrodial.exe is a GUI app: start it and wait, with its output going to a file
+          $exe = Resolve-Path windows/src/Gyrodial.App/bin/Release/net10.0-windows10.0.22621.0/Gyrodial.exe
           $out = Join-Path $env:RUNNER_TEMP selftest.txt
           $p = Start-Process -FilePath $exe -ArgumentList --self-test -Wait -PassThru -NoNewWindow -RedirectStandardOutput $out
           Get-Content $out

@@ -7,7 +7,7 @@
 #include <esp_mac.h>
 #include <math.h>
 #include <string.h>
-#include "puck_clock.h"
+#include "gyrodial_clock.h"
 #include "../config.h"
 #include "../hal.h"
 #include "../hostlink.h"
@@ -41,8 +41,8 @@ constexpr uint32_t kBootHelloMs = 600;
 constexpr uint32_t kPairTimeoutMs = 180000;  // the pairing face gives up (and lets the screen rest)
 
 Session s_sess[2];
-char s_name[12] = "Puck";
-char s_puckId[17] = "";
+char s_name[24] = "Gyrodial";  // "Gyrodial-1D4D"
+char s_dialId[17] = "";
 
 int s_pairIdx = -1;  // the session that's pairing, or -1
 char s_pairId[17] = "";
@@ -119,9 +119,9 @@ void sendHello(uint8_t targets, uint8_t flags = 0, bool unprompted = false) {
     bool paired = s_sess[i].paired;
     sendJson(tp, flags, [&](cJSON* d) {
       json::put(d, "t", "hello");
-      json::put(d, "v", PUCK_PROTOCOL_VERSION);
+      json::put(d, "v", GYRODIAL_PROTOCOL_VERSION);
       json::put(d, "fw", esp_app_get_description()->version);
-      json::put(d, "id", s_puckId);
+      json::put(d, "id", s_dialId);
       json::put(d, "name", s_name);
       json::put(d, "paired", paired);
       if (unprompted) json::put(d, "new", true);
@@ -223,9 +223,9 @@ void sendRefused(int idx, const char* id) {
   });
 }
 
-// The app asking to pair is a person clicking "Pair" (or plugging the puck in), so it may override a
-// recent cancel on the puck, but not instantly: an app that retried in a loop would make cancelling
-// on the puck impossible.
+// The app asking to pair is a person clicking "Pair" (or plugging the dial in), so it may override a
+// recent cancel on the dial, but not instantly: an app that retried in a loop would make cancelling
+// on the dial impossible.
 bool mayPair(int idx) {
   Session& s = s_sess[idx];
   if (!rejected(s.id)) return true;
@@ -468,7 +468,7 @@ void onHello(int idx, const cJSON* d) {
 
   sendHello(tpOf(idx));
   if (!s.paired) {
-    // A bare hello (an app reconnecting on its own) doesn't override a cancel on the puck: say so,
+    // A bare hello (an app reconnecting on its own) doesn't override a cancel on the dial: say so,
     // so the app can tell the person when it will work again
     if (rejected(id)) sendRefused(idx, id);
     else startPairing(idx);
@@ -478,7 +478,7 @@ void onHello(int idx, const cJSON* d) {
 
 void onPairStart(int idx) {
   Session& s = s_sess[idx];
-  if (!s.hello) return;  // the app re-sends hello before "pair start", so this is a puck that just rebooted
+  if (!s.hello) return;  // the app re-sends hello before "pair start", so this is a dial that just rebooted
   if (s.paired) {
     sendPair(tpOf(idx), "ok");
     return;
@@ -609,8 +609,8 @@ void onBleDisconnected() { endSession(kBle); }
 void begin() {
   uint8_t mac[6] = {};
   esp_read_mac(mac, ESP_MAC_BT);
-  snprintf(s_name, sizeof(s_name), "Puck-%02X%02X", mac[4], mac[5]);
-  snprintf(s_puckId, sizeof(s_puckId), "%016llx", (unsigned long long)hal::chipId());
+  snprintf(s_name, sizeof(s_name), "Gyrodial-%02X%02X", mac[4], mac[5]);
+  snprintf(s_dialId, sizeof(s_dialId), "%016llx", (unsigned long long)hal::chipId());
 
   storeBegin();
   storeLoadCfg();
@@ -631,7 +631,7 @@ void poll() {
   if (u.alive && (int32_t)(now - u.lastRx) > (int32_t)LINK_HOST_TIMEOUT_MS) endSession(kUsb, true);
 
   if (!s_bootHelloSent && now >= kBootHelloMs) {
-    // Lets an app that already has the port open notice a freshly booted puck right away.
+    // Lets an app that already has the port open notice a freshly booted dial right away.
     s_bootHelloSent = true;
     sendHello(TP_USB, F_FORCE, true);
   }
@@ -673,7 +673,7 @@ void pairResult(bool ok) {
   if (ok) {
     storeAddHost(id, s_sess[s_pairIdx].name);
     // Tell every transport this PC said hello on, even one that has gone quiet for a moment:
-    // a PC that never hears "ok" would sit in "pairing" while the puck already trusts it
+    // a PC that never hears "ok" would sit in "pairing" while the dial already trusts it
     uint8_t told = 0;
     for (int i = 0; i < 2; i++) {
       Session& s = s_sess[i];
